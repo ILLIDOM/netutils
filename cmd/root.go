@@ -16,6 +16,7 @@ func New() *cobra.Command {
 	rootCmd.AddCommand(
 		multicast.New(),
 	)
+	return rootCmd
 }
 
 func Execute() error {
