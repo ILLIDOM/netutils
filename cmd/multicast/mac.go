@@ -11,6 +11,7 @@ import (
 )
 
 var multicastPrefixMAC = []byte{1, 0, 94} //Decimal Value of 01, 00, 5E
+var multicastIPprefix = []byte{}
 
 func newMacCommand() *cobra.Command {
 	macCommand := &cobra.Command{
