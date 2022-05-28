@@ -11,6 +11,7 @@ func New() *cobra.Command {
 	}
 	multicastCmd.AddCommand(
 		newMacCommand(),
+		newIpCommand(),
 	)
 	return multicastCmd
 }

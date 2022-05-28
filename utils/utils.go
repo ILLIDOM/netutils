@@ -3,44 +3,70 @@ package utils
 import (
 	"fmt"
 	"math"
+	"net"
 	"strconv"
 	"strings"
 )
 
-func MulticastIPfromMAC(multicastMAC []byte) {
-	//TODO -> implement generation of multicast ips from mac
-	fmt.Println("calculation multicast IPs")
+const multicastIpPrefix = "1110"
+
+var multicastPrefixMAC = []byte{1, 0, 94} //Decimal Value of 01, 00, 5E
+
+func IsValidMulticastMAC(macAddress net.HardwareAddr) bool {
+	for i, v := range multicastPrefixMAC {
+		if v != macAddress[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func IsValidMulticastIP(ipAddress net.IP) bool {
+	octet1 := ipAddress[12] //net.IP is always 16 Bytes long - last 4 bytes are ipv4 address
+	octet1string := fmt.Sprintf("%08b", octet1)
+	for i, v := range multicastIpPrefix {
+		if string(octet1string[i]) != string(v) {
+			return false
+		}
+	}
+	return true
+}
+
+func MulticastMACFromIP(ipAddress net.IP) []byte {
+	// TODO implement
+	return []byte{}
+}
+
+func MulticastIPfromMAC(multicastMAC []byte) []string {
 	var binaryStringSlice = []string{}
 
-	var first4bits = "1110"
-
+	//write mac bytes as binary strings into slice
 	for _, v := range multicastMAC {
 		binaryStringSlice = append(binaryStringSlice, fmt.Sprintf("%08b", v))
 	}
 
 	binaryString := strings.Join(binaryStringSlice, "")
-	fmt.Println(binaryString)
 	last25Bits := binaryString[25:48]
-	fmt.Println(last25Bits)
-
 	var missing5Bits = [32]byte{}
 
+	// calculate variable bytes
 	for i := 0; i < 32; i++ {
 		missing5Bits[i] = byte(i)
 	}
 
-	var allMulticastIPStrings = [32]string{}
-
-	for i, v := range missing5Bits {
+	var allMulticastIPStrings = []string{}
+	// calculate binary strings of mc ip addresses and add them to slice
+	for _, v := range missing5Bits {
 		str := fmt.Sprintf("%08b\n", v)[3:8]
-		allMulticastIPStrings[i] = first4bits + str + last25Bits
+		allMulticastIPStrings = append(allMulticastIPStrings, multicastIpPrefix+str+last25Bits)
 	}
 
-	fmt.Println(allMulticastIPStrings)
-	fmt.Println(binaryIpStringToIntString(allMulticastIPStrings[0]))
+	return allMulticastIPStrings
 }
 
-func binaryIpStringToIntString(stringIp string) string {
+// calculates the decimal notation of an ip address using a binary string of length 32
+func BinaryIpStringToIntString(stringIp string) string {
+	//TODO add error handling (no 32 bits, invalid chars etc..)
 	octet1 := stringIp[:8]
 	octet2 := stringIp[8:16]
 	octet3 := stringIp[16:24]
@@ -54,6 +80,7 @@ func binaryIpStringToIntString(stringIp string) string {
 	return strconv.Itoa(octet1int) + "." + strconv.Itoa(octet2int) + "." + strconv.Itoa(octet3int) + "." + strconv.Itoa(octet4int)
 }
 
+// calculates the integer value of a binary string (containing only 0 and 1)
 func binaryStringToInt(binaryString string) int {
 	var value = 0
 	var exponent = len(binaryString) - 1
