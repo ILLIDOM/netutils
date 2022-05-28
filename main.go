@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/ILLIDOM/neturils/multicast/cmd"
+	"github.com/ILLIDOM/netutils/multicast/cmd"
 
 	"fmt"
 	"os"
