@@ -1,5 +1,9 @@
 # build
-netutils
+netutils*
+
+
+# vscode
+.vscode
 
 # Binaries for programs and plugins
 *.exe
