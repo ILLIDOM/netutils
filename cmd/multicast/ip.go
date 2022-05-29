@@ -32,6 +32,7 @@ func newIpCommand() *cobra.Command {
 
 			if !utils.IsValidMulticastIP(ipAddress) {
 				fmt.Println("No valid multicast IP provided: remember the multicast range is 224.0.0.0 – 239.255.255.255")
+				return
 			}
 
 			multicastMACAddress := utils.MulticastMACFromIP(ipAddress)

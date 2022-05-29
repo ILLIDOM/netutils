@@ -13,6 +13,7 @@ const multicastIpPrefix = "1110"
 var multicastPrefixMAC = []byte{1, 0, 94} //Decimal Value of 01, 00, 5E
 
 func IsValidMulticastMAC(macAddress net.HardwareAddr) bool {
+	// check first 3 bytes -> need to match multicast prefix
 	for i, v := range multicastPrefixMAC {
 		if v != macAddress[i] {
 			return false
@@ -22,19 +23,35 @@ func IsValidMulticastMAC(macAddress net.HardwareAddr) bool {
 }
 
 func IsValidMulticastIP(ipAddress net.IP) bool {
-	octet1 := ipAddress[12] //net.IP is always 16 Bytes long - last 4 bytes are ipv4 address
-	octet1string := fmt.Sprintf("%08b", octet1)
-	for i, v := range multicastIpPrefix {
-		if string(octet1string[i]) != string(v) {
-			return false
-		}
-	}
-	return true
+	octet1 := ipAddress[12]         //net.IP is always 16 Bytes long - last 4 bytes are ipv4 address
+	octet1Shifted := octet1 >> 4    // shift octet to get 0000 + last 4 bits
+	prefixShifted := byte(224) >> 4 // shit to get prefix -> 00001110
+
+	return octet1Shifted == prefixShifted
 }
 
-func MulticastMACFromIP(ipAddress net.IP) []byte {
-	// TODO implement
-	return []byte{}
+func MulticastMACFromIP(ipAddress net.IP) net.HardwareAddr {
+	var multicastMAC = []byte{}
+	multicastMAC = append(multicastMAC, multicastPrefixMAC...) //add fix first 3 bytes (01:00:5E)
+	multicastMAC = append(multicastMAC, ipAddress[13])         //copy 2. byte of ip into mac -> first byte start at index 12
+	multicastMAC = append(multicastMAC, ipAddress[14])         //copy 3. byte of ip into mac -> first byte start at index 12
+	multicastMAC = append(multicastMAC, ipAddress[15])         //copy 4. byte of ip into mac -> first byte start at index 12
+
+	//clear msb in 4 octet -> is always 0 in mc mac address
+	octet4int := clearBit(int(multicastMAC[3]), 7)
+	multicastMAC[3] = byte(octet4int)
+
+	hwAddress := make(net.HardwareAddr, 6)
+	copy(hwAddress, multicastMAC)
+
+	return hwAddress
+}
+
+// Clears the bit at pos in n.
+func clearBit(n int, pos uint) int {
+	mask := ^(1 << pos)
+	n &= mask
+	return n
 }
 
 func MulticastIPfromMAC(multicastMAC []byte) []string {
