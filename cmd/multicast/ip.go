@@ -36,8 +36,17 @@ func newIpCommand() *cobra.Command {
 			}
 
 			multicastMACAddress := utils.MulticastMACFromIP(ipAddress)
-			fmt.Println(multicastMACAddress)
+			if all {
+				fmt.Printf("Multicast IP addresses mapping to %v\n", multicastMACAddress)
+				allMulticastIPs := utils.MulticastIPfromMAC(multicastMACAddress)
+				for _, v := range allMulticastIPs {
+					fmt.Println(utils.BinaryIpStringToIntString(v))
+				}
+			} else {
+				fmt.Println(multicastMACAddress)
+			}
 		},
 	}
+	ipCommand.Flags().BoolVar(&all, "all", false, "Flag to show all 32 mutlicast IPs")
 	return ipCommand
 }
