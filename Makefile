@@ -20,7 +20,10 @@ build: windows linux darwin
 
 all: build
 
+test:
+	go test ./...
+
 clean:
 	rm -f $(WINDOWS) $(LINUX) $(DARWIN)
 
-.PHONY: all build clean
+.PHONY: all build clean test

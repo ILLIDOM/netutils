@@ -23,7 +23,7 @@ func newMacCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			// check if input is empty
 			if len(args) != 1 {
-				fmt.Println("Please provide a single MAC address")
+				fmt.Fprintln(cmd.OutOrStdout(), "Please provide a single MAC address")
 				return
 			}
 
@@ -36,7 +36,7 @@ func newMacCommand() *cobra.Command {
 			}
 
 			if !utils.IsValidMulticastMAC(hwAddress) {
-				fmt.Println("No valid Multicast MAC provided: remember Multicast MAC addresses start with 01:00:5e")
+				fmt.Fprintln(cmd.OutOrStdout(), "No valid Multicast MAC provided: remember Multicast MAC addresses start with 01:00:5e")
 				return
 			}
 
@@ -44,10 +44,11 @@ func newMacCommand() *cobra.Command {
 
 			if all {
 				for _, v := range allMulticastIPs {
-					fmt.Println(utils.BinaryIpStringToIntString(v))
+					// fmt.Println(utils.BinaryIpStringToIntString(v))
+					fmt.Fprintln(cmd.OutOrStdout(), utils.BinaryIpStringToIntString(v))
 				}
 			} else {
-				fmt.Println(utils.BinaryIpStringToIntString(allMulticastIPs[0]))
+				fmt.Fprintln(cmd.OutOrStdout(), utils.BinaryIpStringToIntString(allMulticastIPs[0]))
 			}
 		},
 	}
